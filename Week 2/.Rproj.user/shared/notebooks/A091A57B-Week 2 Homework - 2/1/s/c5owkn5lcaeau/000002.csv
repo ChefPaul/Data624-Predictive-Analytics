@@ -1,0 +1,1 @@
+"0","retaildata <- readxl::read_excel(""retail.xlsx"", skip=1)"

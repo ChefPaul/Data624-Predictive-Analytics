@@ -1,0 +1,6 @@
+"0","set.seed(123)"
+"0","chemKnnTuned <- train(Xtrain.data2,"
+"0","                        Ytrain.data2,"
+"0","                        method = ""knn"","
+"0","                        tuneGrid = data.frame(.k = 1:20),"
+"0","                        trControl = trainControl(method = ""cv""))"

@@ -1,0 +1,6 @@
+"0","set.seed(123)"
+"0","chemSvmTuned <- train(Xtrain.data2, Ytrain.data2,"
+"0","                     method = ""svmRadial"","
+"0","                     preProc = c(""center"", ""scale""),"
+"0","                     tuneLength = 14,"
+"0","                     trControl = trainControl(method = ""cv""))"

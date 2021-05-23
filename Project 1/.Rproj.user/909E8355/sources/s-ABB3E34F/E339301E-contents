@@ -1,0 +1,141 @@
+---
+title: "Project 1"
+author: "Paul Perez"
+date: "4/10/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(Amelia)
+library(tidyverse)
+library(readxl)
+```
+
+
+# Part A - ATM Forecast
+Our goal is for Part A of project 1 to forecast how much cash is taken out of the 4 different ATM machines for May 2010. Given the excel file containing all of our data, there are three columns; `DATE`, `ATM`, and `Cash`. We have to explore the dat and determine the best way to forecast, with little direction. 
+
+### Data Collection
+As collect the data, we'll explore the format of the data, types of variables, and 
+```{r}
+atm <- read_excel("ATM624Data.xlsx")
+df.atm <- data.frame(atm)
+```
+
+### Data Cleanse
+
+```{r}
+head(df.atm)
+dim(df.atm)
+```
+Instantly, we could see that the date format needs to be converted to an actual date format, and the shape of the dataset is 1474, 3 meaning there are 1474 records across 3 columns. We can convert that using the base R cast of `as.Date()` function. This information was source from the below stackoverflow link. 
+[How to convert Excel date format to proper date in R](https://stackoverflow.com/questions/43230470/how-to-convert-excel-date-format-to-proper-date-in-r/62334132)
+
+```{r}
+df.atm$DATE <- as.Date(df.atm$DATE, origin = "1899-12-30")
+head(df.atm)
+dim(df.atm)
+```
+
+Now that we have a dataset with actual dates, we can further evaluate the whole dataset.
+
+```{r}
+summary(df.atm)
+```
+
+We can see that the `DATE` column ranges from May 1st, 2010 through May 14th, 2010. The `ATM` column has a length of 1474 confirming the `dim()` function earlier. Additionally, looking at the dataframe preview above using the `head()` function, we can see that there are multiple ATM's in the column. Our third column, `Cash`, has a minimum value of 0.0 and a maximum value of 10919.8. There are 19 NULL values that we can handle when we preprocess the data.
+
+### Complete Dataframe Analysis
+First, we can evaluate the full dataframe, inclusive of all 4 ATM's data. Afterwards, we can evaluate the subset of the dataframe for each ATM.
+
+For the `DATE` column, we can check the range by looking for the difference in the minimum and maximum dates.
+```{r}
+range.full <- max(df.atm$DATE) - min(df.atm$DATE)
+range.full
+```
+
+Regarding the `ATM` column, a set of categorical variables, we can check to see the number of unique values.
+
+```{r}
+unique(df.atm$ATM)
+```
+
+As for the `Cash` column, we can create a histogram to understand the distribution of this numeric variable.
+
+```{r}
+par(mfrow = c(1,3))
+hist(df.atm$Cash)
+boxplot(df.atm$Cash)
+missmap(df.atm)
+```
+
+
+### Create Subsets For Each ATM
+
+```{r}
+df.atm1 <- subset(df.atm, df.atm$ATM == 'ATM1')
+df.atm2 <- subset(df.atm, df.atm$ATM == 'ATM2')
+df.atm3 <- subset(df.atm, df.atm$ATM == 'ATM3')
+df.atm4 <- subset(df.atm, df.atm$ATM == 'ATM4')
+df.atmnull <- subset(df.atm, is.null(df.atm$ATM))
+```
+
+```{r}
+par(mfrow = c(2,4))
+hist(df.atm1$Cash, col = 'red')
+hist(df.atm2$Cash, col = 'green')
+hist(df.atm3$Cash, col = 'blue')
+hist(df.atm4$Cash, col = 'yellow')
+boxplot(df.atm1$Cash, col = 'red')
+boxplot(df.atm2$Cash, col = 'green')
+boxplot(df.atm3$Cash, col = 'blue')
+boxplot(df.atm4$Cash, col = 'yellow')
+```
+
+```{r}
+par(mfrow = c(1,4))
+missmap(df.atm1)
+missmap(df.atm2)
+missmap(df.atm3)
+missmap(df.atm4)
+```
+
+Considering there are little missing values in each of our dataframes, we can simply drop them.
+
+```{r}
+df.atm1 <-drop_na(df.atm1)
+df.atm2 <-drop_na(df.atm2)
+df.atm3 <-drop_na(df.atm3)
+df.atm4 <-drop_na(df.atm4)
+```
+
+```{r}
+range.atm1 <- max(df.atm1$DATE) - min(df.atm1$DATE)
+range.atm2 <- max(df.atm2$DATE) - min(df.atm2$DATE)
+range.atm3 <- max(df.atm3$DATE) - min(df.atm3$DATE)
+range.atm4 <- max(df.atm4$DATE) - min(df.atm4$DATE)
+```
+
+```{r}
+range.atm1
+min(df.atm1$DATE)
+max(df.atm1$DATE)
+range.atm2
+
+range.atm3
+
+range.atm4
+
+```
+
+## ATM 1
+
+
+
+# Part B - Forecasting Power

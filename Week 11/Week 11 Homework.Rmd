@@ -1,0 +1,436 @@
+---
+title: "Homework 8"
+author: "Paul Perez"
+date: "4/25/2021"
+output:
+  html_document: default
+  pdf_document: default
+subtitle: 'Applied Predictive Modeling - Non Linear Regression Models'
+---
+
+
+```{r}
+library(tidyverse)
+library(e1071)
+library(forecast)
+library(AppliedPredictiveModeling)
+library(mlbench)
+library(nnet)
+library(neural)
+library(RSNNS)
+library(plotmo)
+library(caret)
+```
+
+# Exercise 7.2
+Friedman (1991) introduced several benchmark data sets create by simulation. One of these simulations used the following nonlinear equation to create data: 
+
+$$
+y = 10 sin (\pi x_1 x_2) + 20(x_3−0.5)^2 + 10x_4 +5x_5 + N(0,\sigma^2)
+$$
+
+where the x values are random variables uniformly distributed between [0, 1] (there are also 5 other non-informative variables also created in the simulation). The package mlbench contains a function called `mlbench.friedman1` that simulates these data:
+
+```{r}
+library(mlbench)
+set.seed(200)
+trainingData <- mlbench.friedman1(200, sd = 1)
+## We convert the 'x' data from a matrix to a data frame
+## One reason is that this will five the columns names.
+trainingData$x <- data.frame(trainingData$x)
+## Look at the data using
+featurePlot(trainingData$x, trainingData$y)
+```
+
+```{r}
+## or other methods.
+
+## This creates a list with a vector 'y' and a matrix
+## of predictors 'x'.  Also simulate a large test set to
+## estimate the true error rate with good precision:
+testData <- mlbench.friedman1(5000, sd = 1)
+testData$x <- data.frame(testData$x)
+```
+
+### KNN
+
+```{r}
+require(caret)
+knnModel <- train(x = trainingData$x, 
+                  y = trainingData$y,
+                  method = "knn",
+                  preProcess = c("center", "scale"),
+                  tuneLength = 10)
+knnModel
+```
+
+```{r}
+knnPred <- predict(knnModel, newdata = testData$x)
+## The function 'postResample' can be used to get the test set
+## performance values
+postResample(pred = knnPred, obs = testData$y)
+```
+
+```{r}
+knnModel$bestTune
+```
+
+
+```{r}
+ggplot(knnModel)
+```
+
+```{r}
+knnModel$finalModel
+```
+
+
+```{r}
+varImp(knnModel)
+plot(varImp(knnModel))
+```
+
+We see 9 important variables with the Knn model.
+
+\newpage
+
+### MARS 
+```{r}
+library(plotmo)
+marsGrid <- expand.grid(.degree = 1:2, .nprune = 2:38)
+# Fix the seed tso that the results can be reproduced
+set.seed(123)
+marsTuned <- train(x = trainingData$x, 
+                  y = trainingData$y,
+                  method = "earth",
+                  tuneGrid = marsGrid,
+                  preProcess = c("center", "scale"),
+                  tuneLength = 10)
+marsTuned
+```
+
+```{r}
+marsTuned$bestTune
+```
+
+
+```{r}
+ggplot(marsTuned)
+```
+
+We can see the optimal model here has 15 terms.
+
+```{r}
+marsTuned$finalModel
+```
+
+
+```{r}
+varImp(marsTuned)
+plot(varImp(marsTuned))
+```
+
+We can see that with the Mars Model, there is are 5 variables of importance.
+
+\newpage
+
+### Neural Networks
+```{r}
+## Create a specific candidate set of models to evaluate: 
+nnetGrid <- expand.grid(decay = c(0, 0.01, .1), size = c(1:10), bag = FALSE) 
+set.seed(123) 
+nnetTuned <- train(trainingData$x, trainingData$y,  
+                  method = "avNNet",  
+                  tuneGrid = nnetGrid,  
+                  trControl = trainControl(method = "cv", number = 10),
+                  preProc = c("center", "scale"),  
+                  linout = TRUE,  trace = FALSE,  
+                  MaxNWts = 10 * (ncol(trainingData$x) + 1) + 10 + 1, 
+                  maxit = 500)
+nnetTuned
+```
+
+```{r}
+nnetTuned$bestTune
+```
+
+```{r}
+nnetTuned$finalModel
+```
+
+```{r}
+ggplot(nnetTuned)
+```
+
+```{r}
+varImp(nnetTuned)
+plot(varImp(nnetTuned))
+```
+
+With the neural network model, we see that there are 9 variables of importance.
+
+\newpage
+
+### Support Vector Machines
+
+```{r}
+set.seed(123)
+svmTuned <- train(trainingData$x, trainingData$y, 
+                     method = "svmRadial", 
+                     preProc = c("center", "scale"),
+                     tuneLength = 14, 
+                     trControl = trainControl(method = "cv"))
+svmTuned
+```
+
+```{r}
+svmTuned$bestTune
+```
+
+
+```{r}
+svmTuned$finalModel
+```
+
+
+```{r}
+ggplot(svmTuned)
+```
+
+
+```{r}
+varImp(svmTuned)
+plot(varImp(svmTuned))
+```
+
+With out support vector model, we see there are 9 variables of importance.
+
+#### Comparison of Models
+
+```{r}
+marsPred <- predict(marsTuned, newdata = testData$x)
+marsPv <- postResample(pred = marsPred, obs = testData$y)
+marsPv
+
+nnPred <- predict(nnetTuned, newdata = testData$x)
+nnPv <- postResample(pred = nnPred, obs = testData$y) 
+nnPv
+
+svmPred <- predict(svmTuned, newdata = testData$x)
+svmPv <- postResample(pred = svmPred, obs = testData$y) 
+svmPv
+
+knnPred <- predict(knnModel, newdata = testData$x)
+knnPv <- postResample(pred = knnPred, obs = testData$y)
+knnPv
+```
+
+We can see that with our models, the MARS model presents the greatest r-Squared and lowest RMSE. Looking at the variables of importance for the MARS model, we see those variables named X1 - X5.
+
+\newpage
+
+# Exercise 7.5
+
+Exercise 6.3 describes data for a chemical manufacturing process. Use the same data imputation, data splitting, and pre-processing steps as before and train several nonlinear regression models.
+
+For week 10's homework. I created a ridge regression model. Below is the code. Following that, are the non-linear models for this exercise.
+
+### (a) Which nonlinear regression model gives the optimal resampling and test set performance?
+
+```{r}
+library(RANN)
+data("ChemicalManufacturingProcess")
+preprocessing <- preProcess(ChemicalManufacturingProcess[,-1], 
+                            method = c("center", "scale", "knnImpute", "corr", "nzv")) 
+preprocess <- predict(preprocessing, ChemicalManufacturingProcess[,-1])
+```
+
+```{r}
+yield <- as.matrix(ChemicalManufacturingProcess$Yield)
+set.seed(123)
+split2 <- createDataPartition(yield, p = 0.8, list = FALSE, times = 1)
+
+Xtrain.data2  <- preprocess[split2, ]
+xtest.data2 <- preprocess[-split2, ]
+Ytrain.data2  <- yield[split2, ]
+ytest.data2 <- yield[-split2, ]
+```
+
+```{r}
+ridge.grid <- data.frame(.lambda = seq(0, .1, length = 15)) 
+set.seed(123) 
+ctrl <- trainControl(method = "cv", number = 10)
+ridge.mod2 <- train(x=Xtrain.data2, 
+                    y=Ytrain.data2, 
+                    method="ridge", 
+                    tuneGrid=ridge.grid, 
+                    trControl= ctrl)
+ridge.mod2
+plot(ridge.mod2)
+```
+
+
+```{r}
+ridge.mod2$bestTune
+```
+
+```{r}
+ridge.mod2$finalModel
+```
+
+
+```{r}
+ggplot(ridge.mod2)
+```
+
+
+```{r}
+varImp(ridge.mod2)
+plot(varImp(ridge.mod2))
+```
+
+\newpage
+
+### MARS
+
+```{r}
+marsGrid <- expand.grid(.degree = 1:3, .nprune = 2:100)
+set.seed(123)
+chemMarsTuned <- train(Xtrain.data2, Ytrain.data2,
+                   method = "earth",
+                   tuneGrid = marsGrid,
+                   trControl = trainControl(method = "cv", number = 10))
+chemMarsTuned
+```
+
+```{r}
+chemMarsTuned$bestTune
+```
+
+```{r}
+chemMarsTuned$finalModel
+```
+
+
+```{r}
+ggplot(chemMarsTuned)
+```
+
+
+```{r}
+varImp(chemMarsTuned)
+plot(varImp(chemMarsTuned))
+```
+
+
+### Support Vector Machine
+
+```{r}
+set.seed(123)
+chemSvmTuned <- train(Xtrain.data2, Ytrain.data2,
+                     method = "svmRadial",
+                     preProc = c("center", "scale"),
+                     tuneLength = 14,
+                     trControl = trainControl(method = "cv"))
+chemSvmTuned
+```
+
+```{r}
+chemSvmTuned$bestTune
+```
+
+```{r}
+chemSvmTuned$finalModel
+```
+
+
+```{r}
+ggplot(chemSvmTuned)
+```
+
+
+```{r}
+varImp(chemSvmTuned)
+plot(varImp(chemSvmTuned))
+```
+
+
+### KNN
+
+```{r}
+set.seed(123)
+chemKnnTuned <- train(Xtrain.data2,
+                        Ytrain.data2,
+                        method = "knn",
+                        tuneGrid = data.frame(.k = 1:20),
+                        trControl = trainControl(method = "cv"))
+chemKnnTuned
+```
+
+```{r}
+chemKnnTuned$bestTune
+```
+
+```{r}
+chemKnnTuned$finalModel
+```
+
+
+```{r}
+ggplot(chemKnnTuned)
+```
+
+
+```{r}
+varImp(chemKnnTuned)
+plot(varImp(chemKnnTuned))
+```
+
+#### Comparison of Models
+
+```{r}
+ridgePred <- predict(ridge.mod2, newdata = xtest.data2)
+ridgePv2 <- postResample(pred = ridgePred, obs = ytest.data2)
+ridgePv2
+
+marsPred2 <- predict(chemMarsTuned, newdata = xtest.data2)
+marsPv2 <- postResample(pred = marsPred2, obs = ytest.data2)
+marsPv2
+
+svmPred2 <- predict(chemSvmTuned, newdata = xtest.data2)
+svmPv2 <- postResample(pred = svmPred2, obs = ytest.data2) 
+svmPv2
+
+knnPred2 <- predict(chemKnnTuned, newdata = xtest.data2)
+knnPv2 <- postResample(pred = knnPred2, obs = ytest.data2)
+knnPv2
+```
+
+The SVM model shows strong results having a 1.230 RMSE and an r-squared of 0.549.
+\newpage
+
+### (b) Which predictors are most important in the optimal nonlinear regression model?
+
+### MARS
+
+```{r}
+varImp(chemSvmTuned)
+```
+
+### Ridge
+```{r}
+varImp(ridge.mod2)
+```
+
+The outputs for importance of variables with both models show the same variables.
+
+\newpage
+
+### (c) Explore the relationships between the top predictors and the response
+
+```{r}
+cor(yield, ChemicalManufacturingProcess$ManufacturingProcess32)
+cor(yield, ChemicalManufacturingProcess$ManufacturingProcess13)
+```
+
+Looking at the top two Manufacturing Process variables, we  can see a positive correlation with Process 32 and a negative correlation with Process 13.

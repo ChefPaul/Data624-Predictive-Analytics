@@ -1,0 +1,5 @@
+"0",""
+"0","autoplot(ht_hard) +"
+"0","  autolayer(fitted(ht_hard), series=""Fitted"") +"
+"0","  ylab(""Paperback Books"") + xlab(""Time"")"
+"0",""

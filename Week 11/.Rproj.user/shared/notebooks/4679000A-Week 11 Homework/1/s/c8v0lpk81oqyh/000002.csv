@@ -1,0 +1,16 @@
+"0","marsGrid <- expand.grid(.degree = 1:3, .nprune = 2:100)"
+"0","set.seed(123)"
+"0","chemMarsTuned <- train(Xtrain.data2, Ytrain.data2,"
+"0","                   method = ""earth"","
+"0","                   tuneGrid = marsGrid,"
+"0","                   trControl = trainControl(method = ""cv"", number = 10))"
+"2","Loading required package: earth
+"
+"2","Loading required package: Formula
+"
+"2","Loading required package: plotmo
+"
+"2","Loading required package: plotrix
+"
+"2","Loading required package: TeachingDemos
+"

@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1613346628989.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "246A6D7A",
+    "lastKnownWriteTime" : 8368314977163897203,
+    "last_content_update" : 1613346628989,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "10A718AD",
+        "caption" : "tute1",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=tute1&cache_key=10A718AD",
+        "displayedObservations" : 100,
+        "environment" : "",
+        "expression" : "tute1",
+        "object" : "tute1",
+        "preview" : 0,
+        "totalObservations" : 100,
+        "variables" : 4
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

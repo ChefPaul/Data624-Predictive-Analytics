@@ -1,0 +1,281 @@
+---
+title: "Homework 1"
+author: "Paul Perez"
+date: "2/14/2021"
+output:
+  html_document: default
+  pdf_document: default
+subtitle: 'Forecasting: Principles and Practice - Time Series Graphics'
+---
+
+```{r, warning=FALSE, results='hide', echo=FALSE, message=FALSE}
+library(fpp2)
+library(ggplot2)
+```
+
+# Exercise 2.10 - 1
+Use the help function to explore what the series `gold`, `woolyrnq`, and `gas` represent.
+
+The data in `gold` represents daily morning gold prices in US dollars from January 1st, 1985 - March 31st, 1989.
+
+The data in `woolyrnq` represents quarterly production of woolen yarn in Australia from March 1965 - September 1994.
+
+The data in `gas` represents monthly gas production in Australia from 1956 - 1995.
+
+
+a. Use `autoplot()` to plot each of these in separate plots.
+
+```{r}
+autoplot(gold)
+```
+
+```{r}
+autoplot(woolyrnq)
+```
+
+```{r}
+autoplot(gas)
+```
+
+b. What is the frequency of each series? Hint: apply the `frequency()` function.
+
+The frequency for the `gold` series is 1 where the frequency for the `woolyrnq` series is 4, and the frequency for the `gas` series is 12.
+
+```{r}
+frequency(gold)
+```
+
+```{r}
+frequency(woolyrnq)
+```
+
+```{r}
+frequency(gas)
+```
+
+
+c. Use the `which.max()` to spot the outlier in the `gold` series. Which observation was it?
+
+The outlier in the `gold` series is the 770th observation.
+
+```{r}
+which.max(gold)
+```
+
+
+\newpage
+# Exercise 2.10 - 2
+Download the file `tute1.csv` from the book website, open in Excel (or some other spreadsheet application), and review its contents. You should find four columns of information. Columns B through D each contain quarterly series, labelled Sales, AdBudget and GDP. Sales contains the quarterly  sales for a small company over the period 1981-2005. AdBudget is the advertising budget and GDP is the gross domestic product. All series have been adjusted for inflation. 
+
+## a.
+You can read the data into R with the following script:
+
+```{r}
+tute1 <- read.csv("tute1.csv", header=TRUE)
+View(tute1)
+```
+
+## b. 
+Convert the data to time series
+
+```{r}
+mytimeseries <- ts(tute1[,-1], start=1981, frequency=4)
+```
+
+(The [,-1] removes the first column which contains the quarters as we don't need them now)
+
+
+## c.
+Construct time series plots of each of the three series
+```{r}
+autoplot(mytimeseries, facets=TRUE)
+```
+
+Check what happens when you don't include `facets=TRUE`.
+
+When you exclude `facets=TRUE`, we see each of the series are plotted on the same chart, which differs from the previous example where each series is shown to have its own chart.
+
+```{r}
+autoplot(mytimeseries)
+```
+
+\newpage
+# Exercise 2.10 - 3
+Download some monthly Australian retail data from the book website. These represent retail sales in variou categories for different Australian states, and are stored in a MS-Excel file.
+
+## a.
+You can read the data into R with the following script:
+
+```{r}
+retaildata <- readxl::read_excel("retail.xlsx", skip=1)
+```
+
+The second argument (skip=1) is required because Excel sheet has two header rows.
+
+## b.
+Select one of the time series as follows (but replace the column name with your own chosen column):
+
+```{r}
+myts <- ts(retaildata[,"A3349414R"],
+  frequency=12, start=c(1982,4))
+```
+
+## c.
+Explore your chosen retail time series using the following functions: `autoplot()`, `ggseasonplot`, `ggsubseriesplot()`, `gglagplot()`, `ggAcf()`
+
+Can you spot any seasonality, cyclicity and trend? What do you learn about these series?
+
+```{r}
+autoplot(myts)
+```
+
+```{r}
+ggseasonplot(myts)
+```
+
+```{r}
+ggsubseriesplot(myts)
+```
+
+```{r}
+gglagplot(myts)
+```
+
+```{r}
+ggAcf(myts)
+```
+
+Can you spot any seasonality, cyclicity and trend? What do you learn about these series?
+
+`A3349414R` represents the column for Liquor retailing in Victoria. Looking at the `autoplot()` function, we can easily identify an upward trend. As we check out the `ggseasonplot()` function, we can see seasonality toward the end of the year, specifically in November and December, which increase in sales are likely due to the holiday's. Using the `ggsubseriesplot()` we can see that the mean of sales for each month is greater in those later months, starting with a gradual increase at the end of the summer but having its greatest increase from November to December.Looking into the `gglagplot()` functions output, we can see that the greatest correlation of lag is displayed with lag 12 meaning that their is a stronger case for seasonality here. To follow, the results of the `ggAcf()` function show that there is a slow decrease in ACF as the lags increase due to a trend, and the peaks of this decrease are for the vales of 12 and 24 showing the correlation of the same period 1 and 2 years back.
+
+
+
+\newpage
+# Exercise 2.10 - 6
+Use the following graphics functions: `autoplot()`, `ggseasonplot()`, `ggsubseriesplot()`, `gglagplot()`, `ggAcf()` and explore features from the following time series: `hsales`, `usdeaths`, `bricksq`, `sunspotarea`, `gasoline`.
+
+- Can you spot any seasonality, cyclicity and tend?
+- What do you learn about the series?
+
+## hsales
+
+The `hsales` series are monthly sales of new one-family houses sold in the USA since 1973.
+
+```{r}
+autoplot(hsales)
+```
+
+```{r}
+ggseasonplot(hsales)
+```
+
+```{r}
+ggsubseriesplot(hsales)
+```
+
+```{r}
+gglagplot(hsales)
+```
+
+```{r}
+ggAcf(hsales)
+```
+
+Looking at the `autoplot()` function, we cannot really identify a trend going up or down being that the movement is sideways along the plot. As we check out the `ggseasonplot()` function, we can see seasonality toward the begining of the year, specifically in Q1 of each year. Using the `ggsubseriesplot()` we can see that the mean of sales for each month is greater in those earlier months, starting with a gradual decrease into the summer months.Looking into the `gglagplot()` functions output, we can see that the greatest correlation of lag is displayed with lag 1 and 2 meaning that their is a stronger case for seasonality here. To follow, the results of the `ggAcf()` function show that there is a slow decrease in ACF as the lags increase due to a trend, and the peaks of this decrease are for the vales of 12 and 24 showing the strong correlation of the same period 1 year back.
+
+## usdeaths
+
+The `usdeaths` series are monthly accidental deaths in the USA.
+
+```{r}
+autoplot(usdeaths)
+```
+
+```{r}
+ggseasonplot(usdeaths)
+```
+
+```{r}
+ggsubseriesplot(usdeaths)
+```
+
+```{r}
+gglagplot(usdeaths)
+```
+
+```{r}
+ggAcf(usdeaths)
+```
+
+Looking at the `autoplot()` function, we cannot really identify a trend going up or down being that the movement is sideways along the plot. As we check out the `ggseasonplot()` function, we can see seasonality toward the middle of the year, specifically in the summer months. Using the `ggsubseriesplot()` we can see that the mean of deaths for each month is greater in those summer months, starting with a gradual increase from February going into the summer months but hitting its peak in July before starting to decrease.Looking into the `gglagplot()` functions output, we can see that the greatest correlation of lag is displayed with lag 1 and 2 meaning that their is a stronger case for seasonality here. To follow, the results of the `ggAcf()` function show that the strongest periods of lag occur between the 6 and 12 lag periods, but repeat again from the 18 to 24 lag periods.
+
+
+## bricksq
+
+The `bricksq` series are quarterly Australian clay brick production from 1956 - 1994.
+
+```{r}
+autoplot(bricksq)
+```
+
+```{r}
+ggseasonplot(bricksq)
+```
+
+```{r}
+ggsubseriesplot(bricksq)
+```
+
+```{r}
+gglagplot(bricksq)
+```
+
+```{r}
+ggAcf(bricksq)
+```
+
+Looking at the `autoplot()` function, we can identify a few trends as there is one going up into the 1980's but then a reversal and down trend in the early 1980's. As we check out the `ggseasonplot()` function, we can see some seasonality toward Q3. Using the `ggsubseriesplot()` we can see that the mean of production increase into Q2 and Q3 before tapering off into Q4. Looking into the `gglagplot()` functions output, we can see that the greatest correlation of lag is displayed with lag 1 meaning that their is a stronger case for seasonality here. To follow, the results of the `ggAcf()` function show that the strongest periods of lag occur every 4th period showing seaonality and cycles of each quarter.
+
+
+## sunspotarea
+
+The `sunspotarea` series are annual averages of the daily sunspot areas for the full sun from May 1874 - 1976
+
+```{r}
+autoplot(sunspotarea)
+```
+
+```{r}
+gglagplot(sunspotarea)
+```
+
+```{r}
+ggAcf(sunspotarea)
+```
+
+There really is no trend here as this data displays more of just obersvations and periods in time for tracking the sun spot. We may want to consider it cyclical because it does show consistent peaks and troughs.
+
+
+## gasoline
+
+The `gasoline` series are weekly gasoline production supplied data from February 2nd, 1991 to January 20th, 2017.
+
+```{r}
+autoplot(gasoline)
+```
+
+```{r}
+ggseasonplot(gasoline)
+```
+
+
+```{r}
+gglagplot(gasoline)
+```
+
+```{r}
+ggAcf(gasoline)
+```
+
+Looking at the `autoplot()` function, we can identify a few trends as there is one going up into the late 2000's before reversing into a brief downtrend and then correcting back into an update in the mid 2010's. As we check out the `ggseasonplot()` function, we see increased production during the middle and end of the years displaying seasonality. Looking into the `gglagplot()` functions output, we can see some stronger correlation displayed with lag 1 meaning.

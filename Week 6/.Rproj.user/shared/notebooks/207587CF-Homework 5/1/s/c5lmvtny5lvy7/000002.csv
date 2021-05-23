@@ -1,0 +1,2 @@
+"0","ht_hard <- holt(books[,""Hardcover""], h = 4)"
+"0","ht_hard"

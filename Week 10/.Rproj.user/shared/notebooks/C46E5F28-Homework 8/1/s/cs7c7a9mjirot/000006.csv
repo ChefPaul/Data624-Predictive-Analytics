@@ -1,0 +1,8 @@
+"0","library(caret)"
+"0","nzv <- nearZeroVar(fingerprints)"
+"0","not.nzv <- fingerprints[, -nzv]"
+"0","ncol(not.nzv)"
+"1","[1]"
+"1"," 388"
+"1","
+"

@@ -1,0 +1,4 @@
+"0","gafa_stock %>% fill_gaps(.full = TRUE) %>% gg_season(Close, period = ""day"")"
+"2","Error: The data must contain at least one observation per seasonal period.
+[90mRun `rlang::last_error()` to see where the error occurred.[39m
+"

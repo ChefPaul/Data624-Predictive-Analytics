@@ -1,0 +1,4 @@
+"0","plastics3 <- plastics"
+"0","plastics3[30] <- plastics3[30] + 500"
+"0","outlier_decomp3 <- decompose(plastics3, type=""multiplicative"")"
+"0","autoplot(outlier_decomp3)"

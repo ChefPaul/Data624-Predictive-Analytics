@@ -1,0 +1,3 @@
+"0","decomp <- plastics %>% decompose(type=""multiplicative"")"
+"0","season_adj <- plastics/decomp$seasonal"
+"0","autoplot(season_adj)"

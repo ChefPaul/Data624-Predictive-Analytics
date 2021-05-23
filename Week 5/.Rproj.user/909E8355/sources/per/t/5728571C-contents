@@ -1,0 +1,105 @@
+---
+title: "Homework 3"
+author: "Paul Perez"
+date: "2/28/2021"
+output:
+  html_document: default
+  pdf_document: default
+subtitle: 'Forecasting: Principles and Practice - Time Series Decomposition'
+---
+
+```{r, warning=FALSE, results='hide', echo=FALSE, message=FALSE}
+library(fpp2)
+library(ggplot2)
+library(seasonal)
+```
+
+# Exercise 6.9 - 2
+The `plastics` data set consists of the monthly sales (in thousands) of product A for a plastics manufacturer for five years.
+
+## a. Plot the time series of sales of product A. Can you identify seasonal fluctuations and/or a trend-cycle?
+
+```{r}
+autoplot(plastics)
+```
+
+The `plastics` dataset over the course of 5 years shows an upward trend. Additionally, the data looks cyclical and seasonal as the mid-year months have greater sales than those of the earlier and later months of the year.
+
+## b. Use a classifical multiplicative decomposition to calculate the trend-cycle and seasonal indices.
+
+```{r}
+plastics %>% decompose(type="multiplicative") %>%
+  autoplot() + xlab("Year") +
+  ggtitle("Classical multiplicative decomposition
+    of plastics dataset index")
+```
+
+## c. Do the results support the graphical interpretation from part a?
+
+The results do support the graphical interpretation as the upward trend is clearly identifiable as well as the evenly spaced peaks and throughs of the data. 
+
+## d. Compute and plot the seasonally adjusted data.
+
+```{r}
+decomp <- plastics %>% decompose(type="multiplicative")
+season_adj <- plastics/decomp$seasonal
+autoplot(season_adj)
+```
+
+To adjust for seasonality using the multiplicative decomposition, we can take the original data and divide it by the seasonal result of the decomposition.
+
+## e. Change on observation to be an outlier (e.g., add 500 to one observation), and recompute the seasonally adjusted data. What is the effect of the outlier?
+
+```{r}
+plastics2 <- plastics
+plastics2[15] <- plastics2[15] + 500
+outlier_decomp <- decompose(plastics2, type="multiplicative")
+autoplot(outlier_decomp)
+```
+
+The outlier was applied to the 15th month of data, and it can be seen in the data as the peak after the seasonal data increases out of its first through. This is visible in the data chart above but does not seem to affecvt the seasonal chart at all. In the remainder chart, we can see the outlier is visible.
+
+## f. Does it make any difference if the outlier is near the end rather than in the middle of the time series?
+
+```{r}
+plastics3 <- plastics
+plastics3[30] <- plastics3[30] + 500
+outlier_decomp3 <- decompose(plastics3, type="multiplicative")
+autoplot(outlier_decomp3)
+```
+
+```{r}
+plastics4 <- plastics
+plastics4[55] <- plastics4[55] + 500
+outlier_decomp4 <- decompose(plastics4, type="multiplicative")
+autoplot(outlier_decomp4)
+```
+
+Considering the first outlier transformation made was earlier in the set, I replicated the process for the middle (30), as well as near end (55) and can do a quick diagnostic check with the above plots of decomposition to see that the data changes, but the seasonal and trends remain fairly consistent.
+
+# Exercise 6.9 - 3
+Recall your retail time series data (from Exercise 3 in Section 2.10). Decompose the series using X11. Does it reveal any outliers, or unsual features that you had not noticed previously?
+
+```{r}
+retaildata <- readxl::read_excel("retail.xlsx", skip=1)
+
+myts <- ts(retaildata[,"A3349414R"],
+  frequency=12, start=c(1982,4))
+
+myts %>% seas(x11="") -> fit
+
+autoplot(fit) +
+  ggtitle("X11 decomposition of retail sales index")
+```
+
+```{r}
+autoplot(myts, series="Data") +
+  autolayer(trendcycle(fit), series="Trend") +
+  autolayer(seasadj(fit), series="Seasonally Adjusted") +
+  xlab("Year") + ylab("Liquor Sales Index") +
+  ggtitle("Liquor Retail Sales") +
+  scale_colour_manual(values=c("gray","blue","red"),
+             breaks=c("Data","Seasonally Adjusted","Trend"))
+```
+
+While looking at the Liquor retail sales data, and the application of the X11 decomposition, I have not identified any outliers or previously unnoticed features of the data.

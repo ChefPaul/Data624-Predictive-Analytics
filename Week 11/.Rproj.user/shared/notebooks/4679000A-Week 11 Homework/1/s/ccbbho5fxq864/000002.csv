@@ -1,0 +1,8 @@
+"0","yield <- as.matrix(ChemicalManufacturingProcess$Yield)"
+"0","set.seed(123)"
+"0","split2 <- createDataPartition(yield, p = 0.8, list = FALSE, times = 1)"
+"0",""
+"0","Xtrain.data2  <- preprocess[split2, ]"
+"0","xtest.data2 <- preprocess[-split2, ]"
+"0","Ytrain.data2  <- yield[split2, ]"
+"0","ytest.data2 <- yield[-split2, ]"

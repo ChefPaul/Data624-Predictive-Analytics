@@ -1,0 +1,2 @@
+"0","tute1 <- read.csv(""tute1.csv"", header=TRUE)"
+"0","View(tute1)"

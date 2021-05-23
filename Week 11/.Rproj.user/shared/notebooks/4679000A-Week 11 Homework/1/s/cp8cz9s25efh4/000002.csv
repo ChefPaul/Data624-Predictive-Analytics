@@ -1,0 +1,7 @@
+"0","## or other methods."
+"0",""
+"0","## This creates a list with a vector 'y' and a matrix"
+"0","## of predictors 'x'.  Also simulate a large test set to"
+"0","## estimate the true error rate with good precision:"
+"0","testData <- mlbench.friedman1(5000, sd = 1)"
+"0","testData$x <- data.frame(testData$x)"

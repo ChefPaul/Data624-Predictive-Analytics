@@ -1,0 +1,18 @@
+"0","library(tidyverse)"
+"0","library(mlbench)"
+"0","library(caret)"
+"0","library(Cubist)"
+"0","library(gbm)"
+"0","library(ipred)"
+"0","library(party)"
+"0","library(partykit)"
+"0","library(randomForest)"
+"0","library(rpart)"
+"0","#library(rJava)"
+"0","library(RWeka)"
+"2","Error: package or namespace load failed for ‘RWeka’:
+ .onLoad failed in loadNamespace() for 'rJava', details:
+  call: inDL(x, as.logical(local), as.logical(now), ...)
+  error: unable to load shared object 'C:/Users/athle/Documents/R/win-library/4.0/rJava/libs/x64/rJava.dll':
+  LoadLibrary failure:  The specified module could not be found.
+"

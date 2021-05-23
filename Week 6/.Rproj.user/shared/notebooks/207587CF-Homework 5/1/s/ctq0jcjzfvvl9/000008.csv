@@ -1,0 +1,4 @@
+"0",""
+"0","autoplot(ht_myts1) +"
+"0","  autolayer(fitted(ht_myts1), series=""Fitted"") +"
+"0","  ylab(""Liquor Sales"") + xlab(""Time"")"

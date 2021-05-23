@@ -1,0 +1,3 @@
+"0","autoplot(fc) +"
+"0","  autolayer(fitted(fc), series=""Fitted"") +"
+"0","  ylab(""Number of Slaughtered Pigs in Victoria"") + xlab(""Year"")"

@@ -1,0 +1,5 @@
+"0","df.atm1 <- subset(df.atm, df.atm$ATM == 'ATM1')"
+"0","df.atm2 <- subset(df.atm, df.atm$ATM == 'ATM2')"
+"0","df.atm3 <- subset(df.atm, df.atm$ATM == 'ATM3')"
+"0","df.atm4 <- subset(df.atm, df.atm$ATM == 'ATM4')"
+"0","df.atmnull <- subset(df.atm, is.null(df.atm$ATM))"

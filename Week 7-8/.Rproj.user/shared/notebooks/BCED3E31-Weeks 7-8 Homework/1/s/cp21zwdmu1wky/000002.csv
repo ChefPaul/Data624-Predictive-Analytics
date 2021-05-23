@@ -1,0 +1,2 @@
+"0","mcopper_lambda <- BoxCox.lambda(mcopper)"
+"0","mcopper %>% BoxCox(mcopper_lambda) %>% diff() %>% autoplot()"

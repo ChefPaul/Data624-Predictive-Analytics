@@ -1,0 +1,4 @@
+"0",""
+"0","autoplot(ht_paper) +"
+"0","  autolayer(fitted(ht_paper), series=""Fitted"") +"
+"0","  ylab(""Paperback Books"") + xlab(""Time"")"

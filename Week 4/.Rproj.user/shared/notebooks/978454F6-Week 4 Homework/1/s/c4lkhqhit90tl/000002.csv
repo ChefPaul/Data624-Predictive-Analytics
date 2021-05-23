@@ -1,0 +1,7 @@
+"0","autoplot(myts, series=""Data"") +"
+"0","  autolayer(trendcycle(fit), series=""Trend"") +"
+"0","  autolayer(seasadj(fit), series=""Seasonally Adjusted"") +"
+"0","  xlab(""Year"") + ylab(""Liquor Sales Index"") +"
+"0","  ggtitle(""Liquor Retail Sales"") +"
+"0","  scale_colour_manual(values=c(""gray"",""blue"",""red""),"
+"0","             breaks=c(""Data"",""Seasonally Adjusted"",""Trend""))"

@@ -1,0 +1,10 @@
+"0","library(mlbench)"
+"0","library(purrr)"
+"0","library(tidyr)"
+"0","library(ggplot2)"
+"0","library(corrplot)"
+"0","library(dplyr)"
+"0","library(caret)"
+"2","Error: package or namespace load failed for ‘caret’ in loadNamespace(j <- i[[1L]], c(lib.loc, .libPaths()), versionCheck = vI[[j]]):
+ namespace ‘generics’ 0.0.2 is already loaded, but >= 0.1.0 is required
+"

@@ -1,0 +1,7 @@
+"0","ndiffs(wmurders)"
+"1","[1]"
+"1"," 2"
+"1","
+"
+"0","wm_lambda <- BoxCox.lambda(wmurders)"
+"0","wmurders %>% BoxCox(wm_lambda) %>% diff() %>% diff()  %>% ggtsdisplay()"

@@ -1,0 +1,2 @@
+"0","lambda <- BoxCox.lambda(usnetelec)"
+"0","autoplot(BoxCox(usnetelec, lambda))"

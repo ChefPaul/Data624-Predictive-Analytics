@@ -1,0 +1,7 @@
+"0","set.seed(123)"
+"0","split <- createDataPartition(permeability, p = 0.8, list = FALSE, times = 1)"
+"0",""
+"0","Xtrain.data  <- not.nzv[split, ] #fingerprints train"
+"0","xtest.data <- not.nzv[-split, ] #fingerprints test"
+"0","Ytrain.data  <- permeability[split, ] #permability train"
+"0","ytest.data <- permeability[-split, ] #permability test"

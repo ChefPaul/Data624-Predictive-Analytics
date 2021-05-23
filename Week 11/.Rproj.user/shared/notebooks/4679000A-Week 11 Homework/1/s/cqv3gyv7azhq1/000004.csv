@@ -1,0 +1,8 @@
+"0","library(mlbench)"
+"0","set.seed(200)"
+"0","trainingData <- mlbench.friedman1(200, sd = 1)"
+"0","## We convert the 'x' data from a matrix to a data frame"
+"0","## One reason is that this will five the columns names."
+"0","trainingData$x <- data.frame(trainingData$x)"
+"0","## Look at the data using"
+"0","featurePlot(trainingData$x, trainingData$y)"

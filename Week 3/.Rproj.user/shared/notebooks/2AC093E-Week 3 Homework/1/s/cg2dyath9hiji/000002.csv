@@ -1,0 +1,4 @@
+"0","autoplot(myts) +"
+"0","  autolayer(fc, series = ""Original Split"") +"
+"0","  autolayer(fc2, series = ""Second Split"") +"
+"0","  autolayer(fc3, series = ""Third Split"")"

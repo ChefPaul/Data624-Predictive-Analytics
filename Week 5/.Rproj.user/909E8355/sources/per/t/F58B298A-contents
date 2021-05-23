@@ -1,0 +1,114 @@
+---
+title: "Homework 4"
+author: "Paul Perez"
+date: "3/7/2021"
+output:
+  pdf_document: default
+  html_document: default
+subtitle: 'Applied Predictive Modeling - Data Pre-Processing & Over-Fitting and Model Tuning'
+---
+
+```{r, warning=FALSE, results='hide', echo=FALSE, message=FALSE}
+library(mlbench)
+library(purrr)
+library(tidyr)
+library(ggplot2)
+library(corrplot)
+library(dplyr)
+library(caret)
+library(Amelia)
+```
+
+# Chapter 3 - Exercise 3.1
+The UC Irvice Machine Learning Repository contains a data set related to glass identification. The dta aconsists of 214 glass samples labeled as one of seven class categories. There are nine predictors, including the refractive index and percentages of eight elements: Na, Mg, Al, Si, K, Ca, Ba, and Fe.
+The data can be accessed via:
+```{r}
+data(Glass)
+str(Glass)
+```
+
+## (a) Using visualizations, explore the predictor variables to understand their distributions as well as the relationships between predictors.
+```{r}
+Glass %>%
+  keep(is.numeric) %>%
+  gather() %>%
+  ggplot(aes(value)) + 
+    facet_wrap(~ key, scales = "free") + 
+    geom_histogram()
+```
+
+
+```{r}
+Glass %>%
+  keep(is.numeric) %>%
+  gather() %>%
+  ggplot(aes(value)) + 
+    facet_wrap(~ key, scales = "free") + 
+    geom_boxplot(outlier.color = "red") + 
+    coord_flip()
+```
+
+
+```{r}
+glass.matrix <- data.matrix(Glass, rownames.force = NA)
+glass.corr <- cor(glass.matrix)
+corrplot(glass.corr, method = "color")
+```
+
+## (b) Do there appear to be any outliers in the data? Are there any predictors skewed?
+
+While there are some outliers all of the predictor variables except `Mg`, one can argure that almost all of the predictors are skewed. Looking at the histograms abovge, we can see that predictor variables such as `RI`, `Na`, `Al`, and `Si` may show central distributions, they do appear to be slightly skewed. 
+
+Left-Skew Predictor Variables:
+- `Mg`
+- `Si` (More of symmetric distribution but shows slight left-skew)
+
+Right-Skew Predictor Variables:
+- `RI` 
+- `Na`(More of symmetric distribution but shows slight right-skew)
+- `K`
+- `Ca`
+- `Ba`
+- `Fe`
+
+## (c) Are there any relevant transformation of one or more predictors that might improve the classification?
+
+Two relevant transformation applicable here are both PCA and BoxCox transformation (both available in the `Caret` package). Given the boxplots above that show some outliers within our predictor variables, we can also apply the spacial sign transformation.
+
+\newpage
+
+# Chapter 3- Exercise 3.2
+The soybean data can also be found at the UC Irvine Machine Learning Repository. Data were collected to predict disease in 683 soybeans. The 35 predictors are mostly categorical and include information on the environmental conditons (e.g., temperature, precipitation) and plant conditions (e.g., left spots, mold growth). The outcome lables consist of 19 distinct classes.
+The data can be loaded via:
+```{r}
+data(Soybean)
+## See ?Soybean for details
+str(Soybean)
+```
+
+## (a) Investigate the frequency distributions for the categorical predictors. Are any of the distributions degenerate in the ways discussed earlier in this chapter?
+
+```{r}
+Soybean %>% 
+  select(-Class) %>%
+  gather() %>%
+  ggplot(aes(value)) + 
+    geom_bar() + 
+    facet_wrap(~ key)
+```
+
+In the Computing section of Chapter 3 (3.8), we can filter our near zero variance columns using the `Caret` package.
+
+```{r}
+
+
+```
+
+## (b) Roughly 18% of the data are missing. Are there particular predictors that are more likely to be missing? Is the pattern of missing data related to the classes?
+
+```{r}
+missmap(Soybean)
+```
+
+
+## (c) Develop a strategy for handling missing data, either by eliminating predictors or imputation.

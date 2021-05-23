@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1619377337481.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "325293437",
+    "id" : "237DDFD6",
+    "lastKnownWriteTime" : 1618800605,
+    "last_content_update" : 1618800605,
+    "path" : "~/CUNY SPS MS DS/Data 624/Week 10/Week 10 Homework.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "249,0",
+        "scrollLine" : "194"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

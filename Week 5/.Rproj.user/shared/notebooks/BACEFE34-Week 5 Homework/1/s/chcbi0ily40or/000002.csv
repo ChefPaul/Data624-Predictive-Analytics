@@ -1,0 +1,3 @@
+"0","glass.matrix <- data.matrix(Glass, rownames.force = NA)"
+"0","glass.corr <- cor(glass.matrix)"
+"0","corrplot(glass.corr, method = ""color"")"

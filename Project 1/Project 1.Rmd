@@ -1,0 +1,476 @@
+---
+title: "Project 1"
+author: "Paul Perez"
+date: "4/10/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r warning=FALSE, results='hide', echo=FALSE, message=FALSE}
+library(Amelia)
+library(ggplot2)
+library(forecast)
+library(fpp2)
+library(tidyverse)
+library(readxl)
+```
+
+
+# Part A - ATM Forecast
+Our goal is for Part A of project 1 to forecast how much cash is taken out of the 4 different ATM machines for May 2010. Given the excel file containing all of our data, there are three columns; `DATE`, `ATM`, and `Cash`. We have to explore the dat and determine the best way to forecast, with little direction. 
+
+### Data Collection
+As collect the data, we'll explore the format of the data, types of variables in the set.
+```{r}
+atm <- read_excel('ATM624Data.xlsx')
+df.atm <- data.frame(atm)
+```
+
+### Data Cleanse
+
+```{r}
+head(df.atm)
+dim(df.atm)
+```
+Instantly, we could see that the date format needs to be converted to an actual date format, and the shape of the dataset is 1474, 3 meaning there are 1474 records across 3 columns. We can convert that using the base R cast of `as.Date()` function. This information was source from the below stackoverflow link. 
+[How to convert Excel date format to proper date in R](https://stackoverflow.com/questions/43230470/how-to-convert-excel-date-format-to-proper-date-in-r/62334132)
+
+```{r}
+df.atm$DATE <- as.Date(df.atm$DATE, origin = "1899-12-30")
+head(df.atm)
+dim(df.atm)
+```
+
+Now that we have a dataset with actual dates, we can further evaluate the whole dataset.
+
+```{r}
+summary(df.atm)
+```
+
+We can see that the `DATE` column ranges from May 1st, 2010 through May 14th, 2010. The `ATM` column has a length of 1474 confirming the `dim()` function earlier. Additionally, looking at the dataframe preview above using the `head()` function, we can see that there are multiple ATM's in the column. Our third column, `Cash`, has a minimum value of 0.0 and a maximum value of 10919.8. There are 19 NULL values that we can handle when we preprocess the data.
+
+### Complete Dataframe Analysis
+First, we can evaluate the full dataframe, inclusive of all 4 ATM's data. Afterwards, we can evaluate the subset of the dataframe for each ATM.
+
+For the `DATE` column, we can check the range by looking for the difference in the minimum and maximum dates.
+```{r}
+range.full <- max(df.atm$DATE) - min(df.atm$DATE)
+range.full
+```
+
+Regarding the `ATM` column, a set of categorical variables, we can check to see the number of unique values.
+
+```{r}
+unique(df.atm$ATM)
+```
+
+As for the `Cash` column, we can create a histogram to understand the distribution of this numeric variable.
+
+```{r}
+par(mfrow = c(1,3))
+hist(df.atm$Cash)
+boxplot(df.atm$Cash)
+missmap(df.atm)
+```
+
+\newpage
+
+### Create Subsets For Each ATM
+After reviewing the full dataset, we could identify positive right skewness along with some outliers. We'll want to evaluate each of the ATM's subset of the data to eventually create time series objects out of each. Additionally, we'll remove the ATM identifier column as it is no longer needed. From each subset, we can use the `missmap` function to see how many observations are missing, and determine whether we should drop them or try to impute the missing values.
+
+#### ATM 4
+```{r}
+df.atm1 <- subset(df.atm, df.atm$ATM == 'ATM1')
+df.atm1 <- df.atm1[c('DATE', 'Cash')]
+summary(df.atm1)
+missmap(df.atm1)
+```
+
+#### ATM 2
+```{r}
+df.atm2 <- subset(df.atm, df.atm$ATM == 'ATM2')
+df.atm2 <- df.atm2[c('DATE', 'Cash')]
+summary(df.atm2)
+missmap(df.atm2)
+```
+
+
+#### ATM 3
+```{r}
+df.atm3 <- subset(df.atm, df.atm$ATM == 'ATM3')
+df.atm3 <- df.atm3[c('DATE', 'Cash')]
+summary(df.atm3)
+missmap(df.atm3)
+```
+
+#### ATM 4
+```{r}
+df.atm4 <- subset(df.atm, df.atm$ATM == 'ATM4')
+df.atm4 <- df.atm4[c('DATE', 'Cash')]
+summary(df.atm4)
+missmap(df.atm4)
+```
+
+We can see that ATM's 1 and 2 were the only ATM's with missing values, 3 and 2 respectively. With this minimal amount of missing values, we'll drop them from the two subsets.
+
+```{r}
+df.atm1 <- drop_na(df.atm1)
+df.atm2 <- drop_na(df.atm2)
+```
+
+\newpage
+
+## Comparison of Distributions For Each ATM
+With the subsets created, missing values removed, we can evaluate each of the respective subset distributions along with the cash withdrawals overtime.
+```{r}
+par(mfrow = c(2,4))
+hist(df.atm1$Cash, main = 'ATM 1 Histogram', xlab = 'Cash', ylab = 'Frequency', col = 'red')
+hist(df.atm2$Cash, main = 'ATM 2 Histogram', xlab = 'Cash', ylab = 'Frequency', col = 'green')
+hist(df.atm3$Cash, main = 'ATM 3 Histogram', xlab = 'Cash', ylab = 'Frequency', col = 'blue')
+hist(df.atm4$Cash, main = 'ATM 4 Histogram', xlab = 'Cash', ylab = 'Frequency', col = 'gold')
+boxplot(df.atm1$Cash, main = 'ATM 1 Boxplot', xlab = 'ATM 1', ylab = 'Cash', col = 'red')
+boxplot(df.atm2$Cash, main = 'ATM 2 Boxplot', xlab = 'ATM 2', ylab = 'Cash', col = 'green')
+boxplot(df.atm3$Cash, main = 'ATM 3 Boxplot', xlab = 'ATM 3', ylab = 'Cash', col = 'blue')
+boxplot(df.atm4$Cash, main = 'ATM 4 Boxplot', xlab = 'ATM 4', ylab = 'Cash', col = 'gold')
+```
+
+```{r}
+plot(df.atm1, type = 'l', col = 'red')
+plot(df.atm2, type = 'l', col = 'green')
+plot(df.atm3, type = 'l', col = 'blue')
+plot(df.atm4, type = 'l', col = 'gold')
+```
+
+\newpage
+
+## Time Series Analysis
+To get started, we'll need to take our subsets and create a time series object for each ATM using the `ts()` function. We'll specify that the start date for each time series is May 1st, 2009, and the frequency is daily.
+
+```{r}
+ts.atm1 <- ts(df.atm1$Cash, start = c(2009, 5, 1), frequency = 365)
+ts.atm2 <- ts(df.atm2$Cash, start = c(2009, 5, 1), frequency = 365)
+ts.atm3 <- ts(df.atm3$Cash, start = c(2009, 5, 1), frequency = 365)
+ts.atm4 <- ts(df.atm4$Cash, start = c(2009, 5, 1), frequency = 365)
+```
+
+### Time Series ATM 1
+
+```{r}
+ggtsdisplay(ts.atm1, points = FALSE)
+```
+
+Looking at the diagnostics above, we can not identify a clear trend or period of seasonality. The ACF plot shows a correlation especially with the lag of 7. The same can be observed with the PACF plot with the lag of 7.
+
+```{r}
+lam.atm1 <- BoxCox.lambda(ts.atm1)
+lam.atm1
+ggtsdisplay(BoxCox(ts.atm1, lam.atm1))
+```
+
+We can see that our lambda resulted in 1, not changing our data much if at all.
+
+#### Holt - ATM 1
+
+```{r}
+ht.atm1 <- holt(ts.atm1, lambda = lam.atm1, h = 31, damped = TRUE)
+autoplot(ht.atm1) +
+  autolayer(fitted(ht.atm1), series="Fitted") +
+  ylab("Cash") + xlab("Date")
+```
+
+```{r}
+accuracy(ht.atm1)
+checkresiduals(ht.atm1)
+```
+
+Looking at our residuals, they look very similar to pre-transformation, as well as our ACF plot. We do have a RMSE of 36.63 and a significant p-value less that 0.05 at 2.2e-16.
+
+#### ARIMA - ATM 1
+
+```{r}
+ar.atm1 <- auto.arima(ts.atm1)
+autoplot(forecast(ar.atm1, h = 31))
+```
+
+```{r}
+accuracy(ar.atm1)
+checkresiduals(ar.atm1)
+```
+
+Looking at our residuals, they look very similar to pre-transformation, as well as our ACF plot. We do have a RMSE of 35.63 and a significant p-value less that 0.05 at 2.2e-16.
+
+#### Forecast Comparison - ATM 1
+Now we can compare the two forecasts
+```{r}
+comparison <- data.frame(rbind(accuracy(ht.atm1), accuracy(ar.atm1)))
+rownames(comparison) <- c('Holt', 'ARIMA')
+comparison
+```
+
+As we compare the two methods of forecasting, we can see that the ARIMA model, while having the same p-value as the Holt model, has a lower RMSE indicating a better fit. We'll make sure to use the ARIMA model for our forecast export.
+
+```{r}
+for.atm1 <- data.frame(forecast(ar.atm1, h = 31))
+write_csv(remove_rownames(for.atm1), 'Forecast_ATM1.csv')
+```
+
+\newpage
+
+### Time Series ATM 2
+
+```{r}
+ggtsdisplay(ts.atm2, points = FALSE)
+```
+
+Looking at the diagnostics above, we can not identify a clear trend or period of seasonality. The ACF plot shows a correlation especially with the lag of 7. The same can be observed with the PACF plot with the lag of 7 and 14.
+
+```{r}
+lam.atm2 <- BoxCox.lambda(ts.atm2)
+lam.atm2
+ggtsdisplay(BoxCox(ts.atm2, lam.atm2))
+```
+
+We can see that our lambda resulted in 1, not changing our data much if at all.
+
+#### Holt - ATM 2
+
+```{r}
+ht.atm2 <- holt(ts.atm2, lambda = lam.atm2, h = 31, damped = TRUE)
+autoplot(ht.atm2) +
+  autolayer(fitted(ht.atm2), series="Fitted") +
+  ylab("Cash") + xlab("Date")
+```
+
+```{r}
+accuracy(ht.atm2)
+checkresiduals(ht.atm2)
+```
+
+Looking at our residuals, they look very similar to pre-transformation, as well as our ACF plot. We do have a RMSE of 38.25 and a significant p-value less that 0.05 at 2.2e-16.
+
+#### ARIMA - ATM 2
+
+```{r}
+ar.atm2 <- auto.arima(ts.atm2)
+autoplot(forecast(ar.atm2, h = 31))
+```
+
+```{r}
+accuracy(ar.atm2)
+checkresiduals(ar.atm2)
+```
+
+Looking at our residuals, they look very similar to pre-transformation, but the ACF plot has changed to show less of a trend as the lags increase. We see that there is distribution that looks normal with slight skew. Our RMSE is 28.27 and a significant p-value less that 0.05 at 2.2e-16.
+
+#### Forecast Comparison - ATM 2
+Now we can compare the two forecasts
+```{r}
+comparison <- data.frame(rbind(accuracy(ht.atm2), accuracy(ar.atm2)))
+rownames(comparison) <- c('Holt', 'ARIMA')
+comparison
+```
+
+As we compare the two methods of forecasting, similar results as our forecast of ATM 1, both models have significant p-values, but the ARIMA model has a lower RMSE of 28.27 compared to 38.25 indicating a better fit. We'll make sure to use the ARIMA model for our forecast export.
+
+```{r}
+for.atm2 <- data.frame(forecast(ar.atm2, h = 31))
+write_csv(remove_rownames(for.atm2), 'Forecast_ATM2.csv')
+```
+
+\newpage
+
+### Time Series ATM 3
+
+As observed in our data preprocessing, there is not enough data to perform a forecast.
+
+
+\newpage
+
+### Time Series ATM 4
+
+```{r}
+ggtsdisplay(ts.atm4, points = FALSE)
+```
+
+Looking at the diagnostics above, we can not identify a clear trend or period of seasonality. There is an outlier that is likely a mistake in the data. The ACF plot shows all lags within the bounds and the same can be said about the PACF plot.
+
+```{r}
+lam.atm4 <- BoxCox.lambda(ts.atm4)
+lam.atm4
+ggtsdisplay(BoxCox(ts.atm4, lam.atm4))
+```
+
+We can see that our lambda resulted in 1, not changing our data much if at all.
+
+#### Holt - ATM 4
+
+```{r}
+ht.atm4 <- holt(ts.atm4, lambda = lam.atm4, h = 31, damped = TRUE)
+autoplot(ht.atm4) +
+  autolayer(fitted(ht.atm4), series="Fitted") +
+  ylab("Cash") + xlab("Date")
+```
+
+```{r}
+accuracy(ht.atm4)
+checkresiduals(ht.atm4)
+```
+
+Looking at our residuals, they look very similar to pre-transformation, as well as our ACF plot. We do have a RMSE of 652.15 and a p-value greater than 0.05 at .9997.
+
+#### ARIMA - ATM 4
+
+```{r}
+ar.atm4 <- auto.arima(ts.atm4)
+autoplot(forecast(ar.atm4, h = 31))
+```
+
+```{r}
+accuracy(ar.atm4)
+checkresiduals(ar.atm4)
+```
+
+Looking at our residuals, they look very similar to pre-transformation, along with the ACF plot. We see that there is distribution has a skew. Our RMSE is 650.04 and a significant p-value of .9999.
+
+#### Forecast Comparison - ATM 4
+Now we can compare the two forecasts
+```{r}
+comparison <- data.frame(rbind(accuracy(ht.atm4), accuracy(ar.atm4)))
+rownames(comparison) <- c('Holt', 'ARIMA')
+comparison
+```
+
+As we compare the two methods of forecasting, similar results as our forecast of ATM 1 and ATM 2, but this ATM does not have any significant p-values. The ARIMA model has a lower RMSE of 650.04 compared to 652.15 indicating a better fit. We'll make sure to use the ARIMA model for our forecast export.
+
+```{r}
+for.atm4 <- data.frame(forecast(ar.atm4, h = 31))
+write_csv(remove_rownames(for.atm4), 'Forecast_ATM4.csv')
+```
+
+
+\newpage
+
+
+# Part B - Forecasting Power
+Given a simple dataset of residential power usage from January, 1998 through Dec3ember, 2013, we'll need to forecast the residential power for each month of 2014. The variable to forecast is `KWH` which is power consumption in kilowatt hours.
+
+### Data Collection
+
+As collect the data, we'll explore the format of the data, types of variables in the set.
+```{r}
+power <- read_excel('ResidentialCustomerForecastLoad-624.xlsx')
+df.power <- data.frame(power)
+```
+
+### Data Cleanse
+```{r}
+head(df.power)
+dim(df.power)
+```
+Seeing that we have a mix of date formats representing the monthly data. We can use the `paste0()` function to add the first day of each month and apply the same date transformation used in Part A of this project. 
+```{r}
+df.power$YYYY.MMM <- as.Date(paste0(df.power$YYYY.MMM, '-01'), format = '%Y-%b-%d')
+head(df.power)
+dim(df.power)
+summary(df.power)
+```
+
+
+```{r}
+par(mfrow = c(1,2))
+hist(df.power$KWH, col = 'yellow')
+boxplot(df.power$KWH, col = 'yellow')
+missmap(df.power)
+```
+
+
+Seeing that there is only 1 missing value, we can drop that value, and slice the dataset to only keep the date and kilowatt columns.
+
+```{r}
+df.power <- drop_na(df.power)
+df.power <- df.power[c('YYYY.MMM', 'KWH')]
+par(mfrow = c(1,2))
+hist(df.power$KWH, main = 'KWH Histogram', xlab = 'KWH', ylab = 'Frequency',col = 'yellow')
+boxplot(df.power$KWH, main = 'KWH Boxplot', ylab = 'KWH', col = 'yellow')
+missmap(df.power)
+```
+
+```{r}
+plot(df.power, type = 'l', xlab = 'Month')
+```
+
+## Time Series Analysis
+To get started, we'll need to take our power dataset and create a time series object for using the `ts()` function. We'll specify that the start date for the time series is January 1st, 1998, and the frequency is monthly.
+
+```{r}
+ts.power <- ts(df.power$KWH, start = c(1998, 1, 1), frequency = 12)
+```
+
+### Time Series Power
+
+```{r}
+ggtsdisplay(ts.power, points = FALSE)
+```
+
+Looking at the diagnostics above, we can not identify a clear trend or period of seasonality, but possibly a slight uptrend after 2010. The ACF plot shows lags go outside of the bounds for the range of lags. As for the PACF plot, there are lags outside the bounds prior to lag 12.
+
+```{r}
+lam.power <- BoxCox.lambda(ts.power)
+lam.power
+ggtsdisplay(BoxCox(ts.power, lam.power))
+```
+
+We can see that our lambda resulted in 0.063.
+
+#### Holt - Power
+
+```{r}
+ht.power <- holt(ts.power, lambda = lam.power, h = 12, damped = TRUE)
+autoplot(ht.power) +
+  autolayer(fitted(ht.power), series="Fitted") +
+  ylab("KWH") + xlab("Date")
+```
+
+```{r}
+accuracy(ht.power)
+checkresiduals(ht.power)
+```
+
+Looking at our residuals, they look very similar to pre-transformation, but their actual values have changes. We see similar trend with the ACF plot. We do have a RMSE of 1444322 and a significant p-value less that 0.05 at 2.2e-16.
+
+#### ARIMA - Power
+
+```{r}
+ar.power <- auto.arima(ts.power)
+autoplot(forecast(ar.power, h = 12))
+```
+
+```{r}
+accuracy(ar.power)
+checkresiduals(ar.power)
+```
+
+Looking at our residuals, they look very similar to pre-transformation, but have a greater range than compared to the Holt model's residuals. For the ACF plot, we see that our lags are they decrease over time. We do have a RMSE of 927823.9 and a p-value greater than 0.05 at .6207.
+
+#### Forecast Comparison - Power
+Now we can compare the two forecasts
+```{r}
+comparison <- data.frame(rbind(accuracy(ht.power), accuracy(ar.power)))
+rownames(comparison) <- c('Holt', 'ARIMA')
+comparison
+```
+
+As we compare the two methods of forecasting, we can see that the ARIMA model has a lower RMSE indicating a better fit. We'll make sure to use the ARIMA model for our forecast export.
+
+```{r}
+for.power <- data.frame(forecast(ar.power, h = 1))
+write_csv(remove_rownames(for.power), 'Forecast_Power.csv')
+```
+
+
+

@@ -1,0 +1,5 @@
+"0","plastics %>% decompose(type=""multiplicative"") %>%"
+"0","  autoplot() + xlab(""Year"") +"
+"0","  ggtitle(""Classical multiplicative decomposition"
+"0","    of electrical equipment index"")"
+"0",""

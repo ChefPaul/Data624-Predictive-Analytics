@@ -1,0 +1,2 @@
+"0","lambda <- BoxCox.lambda(mcopper)"
+"0","autoplot(BoxCox(mcopper, lambda))"

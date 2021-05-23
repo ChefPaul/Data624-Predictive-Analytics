@@ -1,0 +1,4 @@
+"0",""
+"0","autoplot(ht_eggs3) +"
+"0","  autolayer(fitted(ht_eggs3), series=""Fitted"") +"
+"0","  ylab(""Eggs"") + xlab(""Time"")"

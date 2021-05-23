@@ -1,0 +1,155 @@
+---
+title: "Homework 1"
+author: "Paul Perez"
+date: "2/14/2021"
+output:
+  pdf_document: default
+  html_document: default
+subtitle: 'Forecasting: Principles and Practice - Time Series Graphics'
+---
+
+```{r, warning=FALSE}
+library(fpp3)
+library(ggplot2)
+```
+
+# Exercise 2.10 - 1
+Use the help function to explore what the series `gafa_stock`, `PBS`, `vic_elec` and `pelt` represent.
+
+## a.
+Use `autoplot()` to plot some of the series in these data sets.
+
+## b.
+What is the time interval of each series?
+
+### gafa_stock
+The data in `gafa_stock` represents historical stock prices ($USD) for Google, Amazon, Facebook, and Apple from 2014 - 2018.
+
+```{r}
+gafa_stock
+```
+
+Looking at the `tsibble` object above, we have 5,032 records with 8 values per record. Those are `Symbol`, `Date`, `Open`, `High`, `Low`, `Adj_Close`, and `Volume`. The data [1D] shows that the data is at a daily level, and the Symbol [4] shows that we have four tickers.
+
+```{r}
+gafa_stock %>% distinct(Symbol)
+```
+
+```{r}
+autoplot(gafa_stock)
+```
+
+Using `autoplot()` without specifying a variable to plot, we can see the four stock tickers plotted along the same x-axis using the `Open` variable which is the stocks opening price. Below, we can specifically plot the `Close` price by adding it as the second argument in the `autoplot()` function.
+
+```{r}
+autoplot(gafa_stock, Close)
+```
+
+### PBS
+The data in '`PBS` represents monthly medicare prescription data in Australia.
+```{r}
+PBS
+```
+
+Looking at the `tsibble` object above, we have 65,219 records with 9 values per record. Those are `Month`, `Concession`, `Type`, `ATC1`, `ATC1_desc`, `ATC2`, `ATC2_desc`, `Scripts`, `Cost`. The data [1M] shows that the data is at a monthly level, and the Concession, Type, ATC1, and ATC2 [336] shows that we have each of those values have 336 unique values.
+
+Since there are various levels in this nested `tsibble` object, we'll make sure to filter and aggregate this data accordingly.
+
+```{r}
+PBS %>% distinct(ATC2)
+```
+
+```{r}
+PBS %>%
+  filter(ATC2 == "A01") %>%
+  select(Month, Concession, Type, Cost) %>%
+  summarise(TotalC = sum(Cost)) -> a01
+
+
+PBS %>%
+  filter(ATC2 == "A02") %>%
+  select(Month, Concession, Type, Cost) %>%
+  summarise(TotalC = sum(Cost)) -> a02
+```
+
+```{r}
+autoplot(a01, TotalC)
+```
+
+```{r}
+autoplot(a02, TotalC)
+```
+
+
+### vic_elec
+The data in `vic_elec` represents half-hourly electicity demand for Victoria, Australia given three values; Demand, Temperature, and Holiday.
+
+```{r}
+vic_elec
+```
+
+Looking at the `tsibble` object above, we have 52,608 records with 5 values per record. Those are `Time`, `Demand`, `Temperature`, `Date`, and `Holiday`. The data [30m] shows that the data is at a half-hour time period.
+
+```{r}
+autoplot(vic_elec, Demand)
+```
+
+```{r}
+autoplot(vic_elec, Temperature)
+```
+
+### pelt
+The data in `pelt` represents Hudson Bay Company trading records for Snowshow Hare and Canadian Lynx furs from 1845 to 1935.
+```{r}
+autoplot(pelt)
+```
+
+Looking at the `tsibble` object above, we have 52,608 records with 5 values per record. Those are `Time`, `Demand`, `Temperature`, `Date`, and `Holiday`. The data [30m] shows that the data is at a half-hour time period.
+
+
+\newpage
+# Exercise 2.10 - 2
+Use `filer()` to find what days corresponded to the peak closing price for each of the four stocks in `gafa_stock`.
+
+\newpage
+# Exercise 2.10 - 3
+Download the file `tute1.csv` from the book website, open in Excel (or some other spreadsheet application), and review its contents. You should find four columns of information. Columns B through D each contain quarterly series, labelled Sales, AdBudget and GDP. Sales contains the quarterly  sales for a small company over the period 1981-2005. AdBudget is the advertising budget and GDP is the gross domestic product. All series have been adjusted for inflation. 
+
+## a.
+You can read the data into R with the following script:
+
+```{r}
+tute1 <- readr::read_csv("tute1.csv")
+View(tute1)
+```
+
+## b. 
+Convert the data to time series
+
+```{r}
+mytimeseries <- tute1 %>%
+  mutate(Quarter = yearmonth(Quarter)) %>%
+  as_tsibble(index = Quarter)
+```
+
+## c.
+Construct time series plots of each of the three series
+```{r}
+mytimeseries %>%
+  pivot_longer(-Quarter) %>%
+  ggplot(aes(x = Quarter, y = value, colour = name)) + 
+  geom_line() +
+  facet_grid(name ~ ., scales = "free_y")
+```
+Check what happens when you don't include `facet_grid()`.
+
+
+\newpage
+# Exercise 2.10 - 6
+Create time plots of the following four time series: `Bricks` from `aus_production`, `Lynx` from `pelt`, `Close` from `gafa_stock`, `Demand` from `vic_elect`.
+
+- Use `?` (or `help()`) to find out about the data in each series.
+- For the last plot_modify the axis labels and title.
+
+
+

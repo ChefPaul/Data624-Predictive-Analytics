@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/725852/47c914d997244915bd79a09a8f59c426
+bundleId: https://api.rpubs.com/api/v1/document/725852/47c914d997244915bd79a09a8f59c426
+url: http://rpubs.com/chef_paul/725852
+when: 1613362240.56628

@@ -1,0 +1,4 @@
+"0","range.atm1 <- max(df.atm1$DATE) - min(df.atm1$DATE)"
+"0","range.atm2 <- max(df.atm2$DATE) - min(df.atm2$DATE)"
+"0","range.atm3 <- max(df.atm3$DATE) - min(df.atm3$DATE)"
+"0","range.atm4 <- max(df.atm4$DATE) - min(df.atm4$DATE)"

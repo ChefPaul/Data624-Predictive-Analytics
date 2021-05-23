@@ -1,0 +1,180 @@
+---
+title: "Homework 2"
+author: "Paul Perez"
+date: "2/21/2021"
+output:
+  html_document: default
+  pdf_document: default
+subtitle: 'Forecasting: Principles and Practice - The Forecasters Toolbox'
+---
+
+```{r, warning=FALSE, results='hide', echo=FALSE, message=FALSE}
+library(fpp2)
+library(ggplot2)
+```
+
+# Exercise 3.7 - 1
+For the following series, find an appropriate Box-Cox transformation in order to stabilise the variance.
+
+- `usnetelec`
+- `usgdp`
+- `mcopper`
+- `enplanements`
+
+## usnetelec
+
+```{r}
+autoplot(usnetelec)
+lambda <- BoxCox.lambda(usnetelec)
+autoplot(BoxCox(usnetelec, lambda))
+```
+
+The lambda for the `usnetelec` Box-Cox is 0.5167714.
+
+\newpage
+
+## usgdp
+
+```{r}
+autoplot(usgdp)
+lambda <- BoxCox.lambda(usgdp)
+autoplot(BoxCox(usgdp, lambda))
+```
+
+The lambda for the `usgdp` Box-Cox is 0.366352.
+
+\newpage
+
+## mcopper
+
+```{r}
+autoplot(mcopper)
+lambda <- BoxCox.lambda(mcopper)
+autoplot(BoxCox(mcopper, lambda))
+```
+
+The lambda for the `mcopper` Box-Cox is 0.1919047.
+
+\newpage
+
+## enplanements
+
+```{r}
+autoplot(enplanements)
+lambda <- BoxCox.lambda(enplanements)
+autoplot(BoxCox(enplanements, lambda))
+```
+
+The lambda for the `enplanements` Box-Cox is -0.2269461.
+
+\newpage
+# Exercise 3.7 - 2
+Why is a Box-Cox transformation unhelpful for the `cangas` data?
+
+```{r}
+autoplot(cangas)
+lambda <- BoxCox.lambda(cangas)
+autoplot(BoxCox(cangas, lambda))
+```
+
+Looking at both plots, the original and Box-Cox transformation, there does not appear to be much of a change. Specifically looking at the window of the mid 1970's through to 1990, the variance seems to increase on both plots. We'll need to use a different transformation to handle this dataset.
+
+
+\newpage
+# Exercise 3.7 - 3
+What Box-Cox transformation would you select for your retail data (From Exercise 3 in Section 2.10)?
+
+```{r}
+retaildata <- readxl::read_excel("retail.xlsx", skip=1)
+
+myts <- ts(retaildata[,"A3349414R"],
+  frequency=12, start=c(1982,4))
+```
+
+```{r}
+autoplot(myts)
+lambda <- BoxCox.lambda(myts)
+autoplot(BoxCox(myts, lambda))
+```
+
+Looking into my retail data from exercise 3 in section 2.10, the `BoxCox.lamnda()` function provides us with an ideal lambda of `-0.04159144`. Being that this is negative, and our `BoxCox()` function allows for negative values, we're going to use a Power Transformation using a sign function in the formula. Please see below.
+
+$$
+w_t  =
+    \begin{cases}
+      \log(y_t) & \text{if $\lambda=0$};  \\
+      \text{sign}(y_t)(|y_t|^\lambda-1)/\lambda & \text{otherwise}.
+    \end{cases}
+$$
+
+\newpage
+# Exercise 3.7 - 8
+For your retail time series (from Exercise 3 in Section 2.10):
+
+## a. Split the data into two parts using
+
+```{r}
+myts.train <- window(myts, end=c(2010,12))
+myts.test <- window(myts, start=2011)
+```
+
+## b. Check that your data have been split appropriately by producing the following plot.
+
+```{r}
+autoplot(myts) +
+  autolayer(myts.train, series="Training") +
+  autolayer(myts.test, series="Test")
+```
+
+## c. Calculate forecasts using `snaive` applied to `myts.train`.
+
+```{r}
+fc <- snaive(myts.train)
+```
+
+## d. Compare the accuracy of your forecasts against the actual values stored in `myts.test`.
+
+```{r}
+accuracy(fc,myts.test)
+```
+
+## e. Check the residuals.
+
+```{r}
+checkresiduals(fc)
+```
+
+Do the residuals appear to be uncorrelated and normally distributed?
+
+While there is a slight skew to the right on the residuals distribution plot, there seems to be strong significant of correlation in the lags of the ACF plot.
+
+
+## f. How sensitive are the accuracy measures to the training/test split?
+
+```{r}
+myts.train <- window(myts, end=c(2010,12))
+myts.test <- window(myts, start=2011)
+
+myts.train2 <- window(myts, end=c(2006,12))
+myts.test2 <- window(myts, start=2007)
+
+myts.train3 <- window(myts, end=c(2008,12))
+myts.test3 <- window(myts, start=2009)
+
+fc <- snaive(myts.train)
+fc2 <- snaive(myts.train2)
+fc3 <- snaive(myts.train3)
+
+accuracy(fc, myts.test)
+accuracy(fc2, myts.test2)
+accuracy(fc3, myts.test3)
+```
+
+```{r}
+autoplot(myts) +
+  autolayer(fc, series = "Original Split") +
+  autolayer(fc2, series = "Second Split") +
+  autolayer(fc3, series = "Third Split")
+```
+
+The second split created looks to be the best predicition in this example. I think given these various timeframes to predict against and the varied results, we can say that this accuracy mesaures between the training and test split are sensitive.
